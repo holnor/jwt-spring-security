@@ -21,13 +21,4 @@ public class AccountController {
         this.accountService = accountService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<Void> registerAccount(@RequestBody AccountCommand accountCommand){
-        try {
-            accountService.registerAccount(accountCommand);
-            return new ResponseEntity<>(HttpStatus.CREATED);
-        } catch (EntityExistsException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-    }
 }
