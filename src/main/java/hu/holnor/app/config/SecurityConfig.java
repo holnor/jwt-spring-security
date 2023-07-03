@@ -7,30 +7,41 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private JWTAuthEntrypoint jwtAuthEntrypoint;
     private CustomUserDetailsService customUserDetailsService;
 
     @Autowired
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JWTAuthEntrypoint jwtAuthEntrypoint) {
         this.customUserDetailsService = customUserDetailsService;
+        this.jwtAuthEntrypoint = jwtAuthEntrypoint;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
+                .exceptionHandling()
+                .authenticationEntryPoint(jwtAuthEntrypoint)
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
                 .authorizeHttpRequests()
                 .requestMatchers("/api/accounts/register").permitAll()
                 .requestMatchers("/api/accounts/login").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic();
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -42,5 +53,10 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
+    }
+
+    @Bean
+    public JWTAuthenticationFilter jwtAuthenticationFilter(){
+        return new JWTAuthenticationFilter();
     }
 }

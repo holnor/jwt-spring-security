@@ -1,9 +1,10 @@
 package hu.holnor.app.service;
 
+import hu.holnor.app.config.JWTGenerator;
 import hu.holnor.app.config.Role;
 import hu.holnor.app.domain.Account;
-import hu.holnor.app.dto.income.LoginCommand;
-import hu.holnor.app.dto.income.RegisterCommand;
+import hu.holnor.app.dto.incomming.LoginCommand;
+import hu.holnor.app.dto.incomming.RegisterCommand;
 import hu.holnor.app.repository.AccountRepository;
 import hu.holnor.app.repository.RolesRepository;
 import jakarta.persistence.EntityExistsException;
@@ -25,15 +26,18 @@ public class AccountService {
     private RolesRepository rolesRepository;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private JWTGenerator jwtGenerator;
+
 
 
     @Autowired
     public AccountService(AccountRepository accountRepository, RolesRepository rolesRepository,
-                          PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+                          PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTGenerator jwtGenerator) {
         this.accountRepository = accountRepository;
         this.rolesRepository = rolesRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.jwtGenerator = jwtGenerator;
     }
 
     public void register(RegisterCommand registerCommand) throws EntityExistsException {
@@ -51,9 +55,10 @@ public class AccountService {
         }
     }
 
-    public void login(LoginCommand loginCommand){
+    public String login(LoginCommand loginCommand){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginCommand.getUsername(), loginCommand.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        return jwtGenerator.generateToken(authentication);
     }
 }

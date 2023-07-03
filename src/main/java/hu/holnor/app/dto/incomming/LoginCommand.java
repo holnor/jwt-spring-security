@@ -1,4 +1,4 @@
-package hu.holnor.app.dto.income;
+package hu.holnor.app.dto.incomming;
 
 import lombok.Data;
 
