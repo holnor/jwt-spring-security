@@ -1,4 +1,13 @@
 # JSON Web Token Generálása és Szűrése
+
+## Hasznos linkek
+Ebben a [videóban](https://www.youtube.com/watch?v=7Q17ubqLfaM&t=23s) röviden és érthetően összefoglalják, hogy
+* mi a különbség a session és a token között,
+* hogyan működik
+* miért érdemes használni
+
+A teljes autentikációs folyamathoz pedig ajánlom Teddy Smith csatornájáról a [Spring Bott Security Course](https://www.youtube.com/playlist?list=PL82C6-O4XrHe3sDCodw31GjXbwRdCyyuY) lejátszási listáját, ami nekem is segítségemre volt.
+
 ## Mi is az a JWT
 * A JWT (JSON Web Token) egy nyílt szabvány alapú token formátum, amelyet gyakran használnak az azonosítás és az adatok hitelesítése céljából webalkalmazásokban. A JWT egy kompakt, önálló és biztonságos módszer az információk cseréjére a felhasználók között JSON formátumban.
 
@@ -8,7 +17,7 @@
 
 * A törzs vagy a payload tartalmazza az információkat vagy az adatokat, amelyeket a token hordoz. Ez lehetnek a felhasználó azonosítója, a szerepköre, lejárati idő vagy más egyedi adatok.
 
-* Az aláírás a token hitelesítésére szolgál. Az aláírás elkészítéséhez használnak egy titkos kulcsot (vagy publikus/privát kulcspárt), amely csak a szerveren ismert. Az aláírásban szereplő adatokhoz tartozó hash értéket hasonlítják össze a szerveren a token érvényességének ellenőrzésekor.
+* Az aláírás a token hitelesítésére szolgál. Az aláírás elkészítéséhez egy titkos kulcsot (vagy publikus/privát kulcspárt) használnak, amely csak a szerveren ismert. Az aláírásban szereplő adatokhoz tartozó hash értéket hasonlítják össze a szerveren a token érvényességének ellenőrzésekor.
 
 ### A JWT-t általában a következő módon használják:
 
@@ -20,10 +29,32 @@
 A JWT előnye, hogy könnyen hordozható és önálló, tehát nincs szükség kliens- és szerveroldali állapotkövetésre. Ezenkívül a JWT-k biztonságosak lehetnek, ha megfelelően védik a titkos kulcsot és a token érvényességét ellenőrzik. A JWT használata elterjedt az API autentikációban és az egyszerűsített hozzáféréskezelésben (SSO) alkalmazásokban.
 
 
+## I. Belépési pont
+1. Hozz létre egy osztályt (JWTAuthEntryPoint) ami implementálja az AuthenticationEntrypoint interfészt
+2. Valósítsd meg az interfész metódusát:
+   * a commence() metódus a hitelesítési hibák kezelésére szolgál, és a válaszüzenetben visszajelzést ad a kliensnek arról, hogy az azonosítás sikertelen volt és nincs jogosultsága a kért erőforrás eléréséhez.
+   
 
+   ```response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());```
+   * 401-es választ küld az getMessage()-ben tárolt üzenettel (módosítható).
 
+## II. SecurityConfig módosítások
+1. Add hozzá a fieldekhez a JWTAuthEntryPoint osztályt, és bővítsd ennek megfelelően a konstruktort
+2. Bővítsd a SecurityFilterChaint a kivételkezeléssel, és add hozzá a belépési pontot, valamint a sessionCreationPolicy legyen STATELESS
+    ```.exceptionHandling().authenticationEntryPoint(authEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()```
 
+## II. JWT Generátor
+1. Hozz létre egy osztályt (JWTGenerator), tedd komponensé (@Component)
+2. Legyen egy végleges statikus változója, ami konzisztensen elérhetővé teszi a titkos kulcsot:
+   ```private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);```
 
+* Az HS512 algoritmus a JSON Web Token (JWT) aláírásához használt titkosítási algoritmus. A Keys.secretKeyFor(SignatureAlgorithm.HS512) metódus létrehoz egy új, véletlenszerűen generált kulcsot a megadott algoritmussal. Ez a kulcs szükséges ahhoz, hogy az elkészített JWT-ket aláírjuk, hogy biztosítsuk az adatok integritását és hitelességét.
+* **A gyakorlatban javasolt lehetőség az ilyen érzékeny adatok külső konfigurációs fájlokban vagy környezeti változókban történő tárolása, hogy könnyen lehessen őket cserélni vagy rejtetten tárolni.**
+
+3. Készítsd el a metódusokat, melyekkel legyártod és validálod a tokent, valamint amivel kinyered a felhasználónevet:
+    * generateToken(Authentication authentication) : String
+    * validateToken(String token) : boolean
+    * getUsernameFromJWT(String token) : String
 
 
 
@@ -37,7 +68,7 @@ Ez a leírás a korábbi regisztrációs projektre épül, aminek a leírásást
 1. A SecurityConfig osztályba vegyél fel egy új változót (CustomUserDetailsService)
 2. Hozd létre a CustomUserDetailsService osztályt (@Service), ami implementálni fogja a UserDetailsService interfészt
     * Legyen hozzáférése az AccountRepositroryhoz
-    * Konstruktor injektálás
+    *** Konstruktor injektálás**
     * Írd felül a loadUserByUsername(String username) metódust
         * Hozz létre egy Accountot -> a repóból keresd ki a username alapján (ha nincs ilyen lekérdezésed még, ami
           Accounttal térne vissza, akkor azt is készítsd el)
