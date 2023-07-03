@@ -30,6 +30,5 @@ public class AccountController {
         } catch (EntityExistsException e) {
             return new ResponseEntity<>("Failed: username or email is already in use", HttpStatus.BAD_REQUEST);
         }
-
     }
 }
