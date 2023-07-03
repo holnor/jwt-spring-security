@@ -1,7 +1,7 @@
 package hu.holnor.app.controller;
 
-import hu.holnor.app.dto.income.RegisterCommand;
 import hu.holnor.app.dto.income.LoginCommand;
+import hu.holnor.app.dto.income.RegisterCommand;
 import hu.holnor.app.service.AccountService;
 import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterCommand registerCommand){
+    public ResponseEntity<String> register(@RequestBody RegisterCommand registerCommand) {
         try {
             accountService.register(registerCommand);
             return new ResponseEntity<>("Success", HttpStatus.CREATED);
@@ -39,7 +39,7 @@ public class AccountController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginCommand loginCommand){
+    public ResponseEntity<String> login(@RequestBody LoginCommand loginCommand) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginCommand.getUsername(), loginCommand.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);

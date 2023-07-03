@@ -1,4 +1,30 @@
-# Regisztráció implementálása Spring Boot és WebSecurity használatával
+# Autentikáció adatbázis használatával
+Ez a leírás a korábbi regisztrációs projektre épül, aminek a leírásást az előzzmények szekcióban találod.
+
+### UserDetailsService implementálása
+1. A SecurityConfig osztályba vegyél fel egy új változót (CustomUserDetailsService)
+2. Hozd létre a CustomUserDetailsService osztályt (@Service), ami implementálni fogja a UserDetailsService interfészt
+   * Legyen hozzáférése az AccountRepositroryhoz
+   * Konstruktor injektálás
+   * Írd felül a loadUserByUsername(String username) metódust
+     * Hozz létre egy Accountot -> a repóból keresd ki a username alapján (ha nincs ilyen lekérdezésed még, ami Accounttal térne vissza, akkor azt is készítsd el)
+     * Térj vissza egy új Userrel! Paraméternek add meg az accountból kinyert felhasználónevet, jelszót, és a szerepköröket!
+   <br>A szerepköröknél a User nem fogad List<Role> típusú adatot!</br>
+     * Meppeld át Collettion<GrantedAuthority> típusra egy privát metódusban
+     * Harmadik paraméternek hívd meg ezt a metódust a korábban megírt User konstruktorában
+
+
+
+
+
+
+
+
+
+
+
+
+# ELŐZMÉNYEK: Regisztráció implementálása Spring Boot és WebSecurity használatával
 
 ## <u>1. Alapok</u>
 
@@ -76,4 +102,5 @@ Ezen a ponton az adatbázisba el tudod menteni azokat az adatokat, amiket a felh
 mint felhasználónév, email cím és jelszó.
 
 ### Folytatás
+
 Bejelentkezés kezelése: autentikáció adatbázisból
