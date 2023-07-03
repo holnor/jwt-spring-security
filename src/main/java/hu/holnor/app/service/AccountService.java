@@ -2,6 +2,7 @@ package hu.holnor.app.service;
 
 import hu.holnor.app.config.Role;
 import hu.holnor.app.domain.Account;
+import hu.holnor.app.dto.income.LoginCommand;
 import hu.holnor.app.dto.income.RegisterCommand;
 import hu.holnor.app.repository.AccountRepository;
 import hu.holnor.app.repository.RolesRepository;
@@ -9,6 +10,9 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,5 +49,11 @@ public class AccountService {
             account.setRoles(Collections.singletonList(roles));
             accountRepository.save(account);
         }
+    }
+
+    public void login(LoginCommand loginCommand){
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginCommand.getUsername(), loginCommand.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
