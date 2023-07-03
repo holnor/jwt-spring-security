@@ -6,7 +6,6 @@ import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +22,12 @@ public class AccountController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody AccountCommand accountCommand){
+    public ResponseEntity<String> register(@RequestBody AccountCommand accountCommand) {
         try {
             accountService.register(accountCommand);
             return new ResponseEntity<>("Success", HttpStatus.CREATED);
         } catch (EntityExistsException e) {
             return new ResponseEntity<>("Failed: username or email is already in use", HttpStatus.BAD_REQUEST);
         }
-
     }
 }

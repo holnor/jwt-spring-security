@@ -8,7 +8,6 @@ import hu.holnor.register.repository.RolesRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +20,6 @@ public class AccountService {
     private RolesRepository rolesRepository;
     private PasswordEncoder passwordEncoder;
 
-
     @Autowired
     public AccountService(AccountRepository accountRepository, RolesRepository rolesRepository,
                           PasswordEncoder passwordEncoder) {
@@ -30,8 +28,8 @@ public class AccountService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void register(AccountCommand accountCommand) throws EntityExistsException{
-        if (accountRepository.existsByEmail(accountCommand.getEmail()) || accountRepository.existsByUsername(accountCommand.getUsername())){
+    public void register(AccountCommand accountCommand) throws EntityExistsException {
+        if (accountRepository.existsByEmail(accountCommand.getEmail()) || accountRepository.existsByUsername(accountCommand.getUsername())) {
             throw new EntityExistsException();
         } else {
             Account account = new Account();
