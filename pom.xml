@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>hu.holnor</groupId>
-    <artifactId>register</artifactId>
+    <artifactId>login-spring-security</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>register</name>
     <description>register</description>
