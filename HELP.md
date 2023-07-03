@@ -52,10 +52,23 @@ A JWT előnye, hogy könnyen hordozható és önálló, tehát nincs szükség k
 * **A gyakorlatban javasolt lehetőség az ilyen érzékeny adatok külső konfigurációs fájlokban vagy környezeti változókban történő tárolása, hogy könnyen lehessen őket cserélni vagy rejtetten tárolni.**
 
 3. Készítsd el a metódusokat, melyekkel legyártod és validálod a tokent, valamint amivel kinyered a felhasználónevet:
-    * generateToken(Authentication authentication) : String
-    * validateToken(String token) : boolean
-    * getUsernameFromJWT(String token) : String
+    #### generateToken(Authentication authentication) : String
+* Az authentication-től kérd el a felhasználó nevét
+* Mentsd el az éppen aktuális dátumot, és határozd meg a lejárat idejét (ezt akár egy külön osztályban is megteheted, hogy együtt gyűjtsd a hasonló konstansokat)
+* Add meg a kulcsot és az aláírási algoritmust
+* Végül foglald egybe az eredményt, ami egyben a visszatérési érték
+ 
+#### validateToken(String token) : boolean
+* Dekódold a tokent -> parserBuilder()
+* Add meg a kulcsot -> setSigningKey(key)
+* Hozd létre a JWT parser objektumot -> build()
+* Ellenőrizd az aláírást -> parseClaimsJws(token)
+* Térj vissza true értékkel (Ha az aláírás nem egyező, akkor exception)
 
+#### getUsernameFromJWT(String token) : String
+* Ugyanúgy dekódolni kell a tokent a kulccsal, létre kell hozni a parser objektumot és össze kell hasonlítani az aláírást
+* Ezt követően kérd ki a JWT claims részét -> getBody()
+* Majd abból a felhasználónevet -> getSubject()
 
 
 
