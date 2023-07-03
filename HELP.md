@@ -13,8 +13,28 @@ Ez a leírás a korábbi regisztrációs projektre épül, aminek a leírásást
      * Meppeld át Collettion<GrantedAuthority> típusra egy privát metódusban
      * Harmadik paraméternek hívd meg ezt a metódust a korábban megírt User konstruktorában
 
+### SecurityConfig módosítások
+* Add hozzá osztályváltozóként a CustomUserDetailsService osztályt
+* Konstruktor injektálás
+* A filter chainnél engedélyezd a "/api/accounts/login" végpontot is
+* Hozz létre egy Beant az AuthenticationManagerből
+  * Paraméterként AuthenticationConfiguration
+  * Visszatérésként: authenticationConfiguration.getAuthenticationManager();
 
+### Account Service módosítások
+* A login metódus paraméterként kapjon egy LoginCommand objektumot (tartalmazza a felhasználó által megadott bejelentkezési adatokat)
+* A bejelentkezés során a metódus hozzon létre egy UsernamePasswordAuthenticationToken objektumot, amelyben átadja a felhasználó által megadott felhasználónevet és jelszót. (Ez a token azonosítja majd a bejelentkező felhasználót)
+* Ezt követően a authenticationManager (a Spring Security által biztosított komponens) segítségével autentikáld a felhasználót
+* Az authenticate metódus visszatérési értéke egy Authentication objektum, amely reprezentálja a sikeres bejelentkezést
+* A SecurityContextHolder.getContext().setAuthentication(authentication) kóddal állítsd be az autentikációt a SecurityContextHolder-ben
 
+### AccountController módosítások
+* Hozd létre a PostMapping-et a /login végponton
+* A @RequestBody annotációval kérde be az adatokat LoginCommand formában
+* Hívd meg a szervíz réteg login(LoginCommand loginCommand) metódusát
+* Térj vissza 200-as kóddal
+* _Megjegyzés: A szervíz rétegben a login metóduson belül az authenticate() metódus elvégzi a hitelesítést, és hibás jelszó vagy felhasználónév esetén
+AuthenticationExceptiont dob, aminek eredményeként a controller 401-es kódot küld a kliensnek válaszul. Ha a válasz String formában is meg kell érkezzen, akkor foglald a hívást try/catch blokkba és a catch ágon a kívánt formában küldheted a választ_
 
 
 
@@ -42,14 +62,13 @@ Az alábbi függőségekre lesz szükség:
 0. Az <b>application.yaml</b> fájlban konfiguráld a server és az adatbázis kapcsolatot, valamint a JPA viselkedését és a
    log szintet!
 1. Hozz létre egy SecurityConfig osztályt (@Configuration @EnableWebSecurity) és készíts Bean-eket az alábbiakból:
-
-* SecurityFilterChain
-    * Köss mindent autentikációhoz, és egy felsőbb szinten határozd meg, hogy a /register végpontot mindenki elérhesse
-* UserDetailService
-    * Definiáld a ROLE-okat és térj vissza egy új InMemoryUserDetailsManagerrel
-    * A role adattáblába vidd fel a definiált ROLE-okat, különben a kérés küldésekor hibát kapsz!
-* PasswordEncoder
-    * Térj vissza egy új BCryptEncoderrel
+   * SecurityFilterChain
+       * Köss mindent autentikációhoz, és egy felsőbb szinten határozd meg, hogy a /register végpontot mindenki elérhesse
+   * UserDetailService
+       * Definiáld a ROLE-okat és térj vissza egy új InMemoryUserDetailsManagerrel
+       * A role adattáblába vidd fel a definiált ROLE-okat, különben a kérés küldésekor hibát kapsz!
+   * PasswordEncoder
+       * Térj vissza egy új BCryptEncoderrel
 
 ### Domian, DTO, Repo
 
