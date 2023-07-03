@@ -1,10 +1,10 @@
-package hu.holnor.register;
+package hu.holnor.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class RegisterApplicationTests {
+class SpringSecurityDemoApplicationTests {
 
     @Test
     void contextLoads() {

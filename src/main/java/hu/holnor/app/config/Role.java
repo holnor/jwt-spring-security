@@ -1,4 +1,4 @@
-package hu.holnor.register.config;
+package hu.holnor.app.config;
 
 import jakarta.persistence.*;
 import lombok.Getter;
