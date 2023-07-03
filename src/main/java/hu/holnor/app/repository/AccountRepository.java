@@ -1,6 +1,6 @@
-package hu.holnor.register.repository;
+package hu.holnor.app.repository;
 
-import hu.holnor.register.domain.Account;
+import hu.holnor.app.domain.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
-package hu.holnor.register.config;
+package hu.holnor.app.config;
 
-import hu.holnor.register.domain.Account;
-import hu.holnor.register.repository.AccountRepository;
+import hu.holnor.app.domain.Account;
+import hu.holnor.app.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

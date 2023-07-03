@@ -1,6 +1,6 @@
-package hu.holnor.register.domain;
+package hu.holnor.app.domain;
 
-import hu.holnor.register.config.Role;
+import hu.holnor.app.config.Role;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

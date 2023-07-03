@@ -1,9 +1,9 @@
-package hu.holnor.register.dto.income;
+package hu.holnor.app.dto.income;
 
 import lombok.Data;
 
 @Data
-public class AccountCommand {
+public class RegisterCommand {
     private String username;
     private String password;
     private String email;

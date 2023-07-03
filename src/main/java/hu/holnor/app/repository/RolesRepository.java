@@ -1,6 +1,6 @@
-package hu.holnor.register.repository;
+package hu.holnor.app.repository;
 
-import hu.holnor.register.config.Role;
+import hu.holnor.app.config.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
