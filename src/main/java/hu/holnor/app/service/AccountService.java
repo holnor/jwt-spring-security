@@ -28,8 +28,6 @@ public class AccountService {
     private AuthenticationManager authenticationManager;
     private JWTGenerator jwtGenerator;
 
-
-
     @Autowired
     public AccountService(AccountRepository accountRepository, RolesRepository rolesRepository,
                           PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JWTGenerator jwtGenerator) {
@@ -55,7 +53,7 @@ public class AccountService {
         }
     }
 
-    public String login(LoginCommand loginCommand){
+    public String login(LoginCommand loginCommand) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginCommand.getUsername(), loginCommand.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
