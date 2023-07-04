@@ -43,7 +43,7 @@ A JWT előnye, hogy könnyen hordozható és önálló, tehát nincs szükség k
 2. Bővítsd a SecurityFilterChaint a kivételkezeléssel, és add hozzá a belépési pontot, valamint a sessionCreationPolicy legyen STATELESS
     ```.exceptionHandling().authenticationEntryPoint(authEntryPoint).and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()```
 
-## II. JWT Generátor
+## III. JWT Generátor
 1. Hozz létre egy osztályt (JWTGenerator), tedd komponensé (@Component)
 2. Legyen egy végleges statikus változója, ami konzisztensen elérhetővé teszi a titkos kulcsot:
    ```private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);```
@@ -71,6 +71,14 @@ A JWT előnye, hogy könnyen hordozható és önálló, tehát nincs szükség k
 * Majd abból a felhasználónevet -> getSubject()
 
 
+## IV. JWTAuthenticationFilter
+1. Származtasd le a OncePerRequestFilter osztályból, hogy kérésenként csak egyszer legyen végrehajtva a szűrés
+2. Hozd be a JWTGenerator és a CustomUserDetailsService osztályt (Ügyelj rá, hogy legyen üres konstruktor is, ha konstruktoron keresztül megy az injection)
+3. Valósítsd meg a `doFilterInternal` metódust. (Ellenőrzi, hogy van-e token a headerben)
+   1. Szerezd meg a tokent a kérésből (privát metódus, ami String vagy null értékkel tér vissza: vizsgálj rá, hogy a headerben van-e "Bearer "-rel kezdődő szöveg, és ha igen, akkor nyerd ki az utána kezdődő Stringet)
+   2. Vizsgáld meg a token érvényességét a generátorral `validateToken()` metódusával! Ha érvényes, akkor:
+      1. Szerezd meg a felhasználónevet -> `getUsernameFromJWT(token)`
+      2. Hozz létre egy `UserDetails`-t a felhasználónév alapján
 
 # ELŐZMÉNYEK: Autentikáció adatbázis használatával
 
