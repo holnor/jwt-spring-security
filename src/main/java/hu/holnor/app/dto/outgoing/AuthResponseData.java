@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class AuthResponseData {
     private String accessToken;
-    private String tokenType = "Bearer ";
+    private String tokenType = "Bearer";
 
     public AuthResponseData(String accesToken) {
         this.accessToken = accesToken;

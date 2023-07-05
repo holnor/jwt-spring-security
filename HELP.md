@@ -75,11 +75,53 @@ A JWT előnye, hogy könnyen hordozható és önálló, tehát nincs szükség k
 1. Származtasd le a OncePerRequestFilter osztályból, hogy kérésenként csak egyszer legyen végrehajtva a szűrés
 2. Hozd be a JWTGenerator és a CustomUserDetailsService osztályt (Ügyelj rá, hogy legyen üres konstruktor is, ha konstruktoron keresztül megy az injection)
 3. Valósítsd meg a `doFilterInternal` metódust. (Ellenőrzi, hogy van-e token a headerben)
-   1. Szerezd meg a tokent a kérésből (privát metódus, ami String vagy null értékkel tér vissza: vizsgálj rá, hogy a headerben van-e "Bearer "-rel kezdődő szöveg, és ha igen, akkor nyerd ki az utána kezdődő Stringet)
-   2. Vizsgáld meg a token érvényességét a generátorral `validateToken()` metódusával! Ha érvényes, akkor:
-      1. Szerezd meg a felhasználónevet -> `getUsernameFromJWT(token)`
-      2. Hozz létre egy `UserDetails`-t a felhasználónév alapján
+   1. `getJWTFromRequest(request)` metódus meghívása, hogy kinyerje a JWT tokent az HTTP kérésből. Ezt a metódust neked kell megírni oly módon, hogy kinyerd az Authorization fejlécből a tokent ("Bearer " előtag nélkül) hogy aztán azzal, vagy hiánya esetén nullal visszatérhess
+   2. Az `StringUtils.hasText(token)` metódus ellenőrzi, hogy a token nem üres és tartalmaz valamilyen szöveges értéket.
+   3. `tokenGenerator.validateToken(token)` metódushívással a tokenGenerator objektum validálja a tokent. Ez az ellenőrzés meghatározza, hogy a token érvényes-e, például ellenőrzi az aláírást, az érvényességi időt stb.
+   4. Ha a token érvényes, akkor a `tokenGenerator.getUsernameFromJWT(token)` metódus meghívása történik, hogy kinyerje a felhasználónevet a JWT tokentől.
+   5. `customUserDetailsService.loadUserByUsername(username)` metódushívással a customUserDetailsService objektum betölti a felhasználó részleteit a felhasználónév alapján. Ez az objektum felelős a felhasználói adatok kezeléséért, például az adatbázisból vagy más forrásból való betöltésért.
+   6. A `UsernamePasswordAuthenticationToken` objektum létrehozása az authentikációhoz szükséges. A userDetails paraméter az előző lépésben betöltött felhasználói részleteket tartalmazza, a null a jelszót jelenti (mivel JWT token esetén nincs szükség jelszóval való autentikációra), és a userDetails.getAuthorities() visszaadja a felhasználó jogosultságait.
+   7. Az `authenticationToken.setDetails(...)` metódushívással beállítja az authenticationToken részleteit, például a WebAuthenticationDetailsSource-ból előállított részleteket.
+   8. `SecurityContextHolder.getContext().setAuthentication(authenticationToken)` metódushívással beállítja az aktuális felhasználó hitelesítését a SecurityContextHolder-ben, így az alkalmazás többi részében elérhetővé válik.
+   9. `filterChain.doFilter(request, response)` meghívásával továbbítja a kérést és a választ a következő szűrőlánc elemnek.
 
+## V. SecurityConfig
+1. AJTAuthenticationFilter osztályt tedd Bean-né
+2. A szűrőláncba szúrd be az elkészített filtert: `http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);`
+
+A fenti kódban a `http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)` kifejezés azt jelenti,
+hogy a `jwtAuthenticationFilter()` metódus által létrehozott szűrőt beszúrjuk a szűrőláncba a `UsernamePasswordAuthenticationFilter` osztályú szűrő előtt.
+
+
+## VI. AuthResponseData
+Ez egy egyszerű DTO lesz (@Data), ami két Stringet tartalmaz:
+1. accessToken
+2. tokenType = "Bearer"
+Ezen felül egy konstruktort.
+
+## VII. AccountService
+1. Add hozzá a fieldekhez és a konstruktort is bővítsd a JWTGenerator osztállyal
+2. Írd meg a `login(LoginCommand loginCommand)` metódust:
+   - Az `authenticationManager.authenticate(...)` metódushívással az authenticationManager objektum elvégzi az autentikációt a megadott felhasználónév és jelszó alapján.
+   Ez a lépés az authentikációs folyamatot végzi, például ellenőrzi a felhasználónév-jelszó párost az alkalmazás biztonsági rendszerében vagy más autentikációs forrásban.
+   Az autentikációs eredményt az authentication változóban tároljuk.
+
+   - A `SecurityContextHolder.getContext().setAuthentication(authentication)` metódushívással beállítjuk az aktuális felhasználó hitelesítéséta SecurityContextHolder-ben.
+   Ez azt jelenti, hogy a bejelentkezett felhasználó az alkalmazás többi részében hozzáférhető lesz az autentikációs információkkal.
+
+    - A `jwtGenerator.generateToken(authentication)` metódushívással generálunk egy JWT tokent az autentikációs objektumból. A jwtGenerator objektum felelős a JWT tokenek generálásáért
+   és az autentikációs adatok tokenbe ágyazásáért.
+
+   - Végül a generált JWT tokent visszaadja, amelyet általában a kliens (például egy webalkalmazás vagy mobilalkalmazás) tárol, és a későbbi kérésekben
+   a felhasználó azonosítására és hitelesítésére használja.
+
+## VIII. AccountController
+Itt már csupán meg kell hívni a szervíz rétegből a `login()` metdust a request body-ból lekért LoginCommanddal,
+és gondoskodni kell róla, hogy visszaadjuk a tokent. Ehhez:
+- A `ResponseEntity`-ben egy `AuthResponseData` objektumot küldünk visza, amit a generált token alapján hozunk létre.
+- (A szervíz réteg login metódusa a tokennel tér vissza , így azt el tudod menteni egy Stringbe).
+
+-----------------------------------------------------------------------------------
 # ELŐZMÉNYEK: Autentikáció adatbázis használatával
 
 Ez a leírás a korábbi regisztrációs projektre épül, aminek a leírásást az előzzmények szekcióban találod.
